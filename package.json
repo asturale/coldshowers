@@ -1,0 +1,16 @@
+{
+  "name": "coldshowers",
+  "version": "0.1.0",
+  "description": "Self-hosted cold shower tracker with timer, streaks, charts, and reminders",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-session": "^1.18.0",
+    "better-sqlite3": "^11.3.0",
+    "ejs": "^3.1.10"
+  }
+}

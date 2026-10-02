@@ -1,0 +1,74 @@
+<% var title = t('settings.title') %>
+<%- include('partials/head', { title }) %>
+<%- include('partials/nav') %>
+<main>
+  <h1 class="page-title"><%= t('settings.title') %></h1>
+
+  <div class="card">
+    <h2 style="margin-top:0"><%= t('settings.target_heading') %></h2>
+    <p class="help-text"><%= t('settings.target_help') %></p>
+    <form method="post" action="/settings/target-duration" style="display:flex; gap:0.6em; align-items:center;">
+      <input type="number" name="target_seconds" min="1" max="3600" value="<%= targetSeconds %>" style="width:7em;">
+      <button type="submit"><%= t('settings.save') %></button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0"><%= t('settings.reminder_heading') %></h2>
+    <p class="help-text"><%= t('settings.reminder_help') %></p>
+    <form method="post" action="/settings/reminder" style="display:flex; gap:0.6em; align-items:center; flex-wrap:wrap;">
+      <label style="display:flex; gap:0.4em; align-items:center; font-size:0.9em; margin:0;">
+        <input type="checkbox" name="enabled" <%= reminderEnabled ? 'checked' : '' %>>
+        <%= t('settings.reminder_enabled_label') %>
+      </label>
+      <input type="time" name="time" value="<%= reminderTime %>">
+      <button type="submit"><%= t('settings.save') %></button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0"><%= t('settings.notifications_heading') %></h2>
+    <p class="help-text"><%= t('settings.notifications_help') %></p>
+    <% if (testResult === 'ok') { %><div class="success"><%= t('settings.test_ok') %></div><% } %>
+    <% if (testResult === 'error') { %><div class="error"><%= t('settings.test_error') %></div><% } %>
+    <form method="post" action="/settings/notifications" class="stacked">
+      <div class="radio-row">
+        <% reminderMethods.forEach(function(m) { %>
+        <label><input type="radio" name="method" value="<%= m %>" <%= reminderMethod === m ? 'checked' : '' %>> <%= t('settings.method_' + m) %></label>
+        <% }) %>
+      </div>
+
+      <label><%= t('settings.ntfy_base_url') %></label>
+      <input type="text" name="ntfy_base_url" value="<%= ntfyBaseUrl %>" placeholder="https://ntfy.sh">
+      <label><%= t('settings.ntfy_topic') %></label>
+      <input type="text" name="ntfy_topic" value="<%= ntfyTopic || '' %>" placeholder="coldshowers-yourname">
+      <label><%= t('settings.ntfy_token') %></label>
+      <input type="password" name="ntfy_token" value="<%= ntfyToken || '' %>" placeholder="<%= t('settings.optional') %>">
+
+      <label><%= t('settings.telegram_bot_token') %></label>
+      <input type="password" name="telegram_bot_token" value="<%= telegramBotToken || '' %>">
+      <label><%= t('settings.telegram_chat_id') %></label>
+      <input type="text" name="telegram_chat_id" value="<%= telegramChatId || '' %>">
+
+      <p><button type="submit"><%= t('settings.save') %></button></p>
+    </form>
+    <form method="post" action="/settings/notifications/test">
+      <button type="submit" class="secondary"><%= t('settings.test_button') %></button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0"><%= t('settings.language_heading') %></h2>
+    <form method="post" action="/settings/locale" style="display:flex; gap:0.6em; flex-wrap:wrap; align-items:center;">
+      <select name="locale">
+        <option value="" <%= !storedLocale ? 'selected' : '' %>><%= t('settings.language_auto') %></option>
+        <% SUPPORTED_LOCALES.forEach(function(loc) { %>
+        <option value="<%= loc %>" <%= storedLocale === loc ? 'selected' : '' %>><%= loc === 'nl' ? 'Nederlands' : 'English' %></option>
+        <% }) %>
+      </select>
+      <button type="submit"><%= t('settings.save') %></button>
+    </form>
+  </div>
+</main>
+</body>
+</html>
