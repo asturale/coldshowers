@@ -78,6 +78,23 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
 );
 `);
 
+// Idempotent column migration -- `CREATE TABLE IF NOT EXISTS` above is a
+// no-op against an already-existing table, so a NEW column on an EXISTING
+// table needs its own ALTER step.
+function ensureColumn(table, column, ddl) {
+    const cols = db.prepare(`PRAGMA table_info(${table})`).all();
+    if (!cols.some((c) => c.name === column)) {
+        db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+    }
+}
+
+// Optional "get ready" countdown shown BEFORE the real timer starts, so
+// there's time to physically step into the shower after tapping Start. A
+// sound plays both when this ends (the real cold-shower time begins) and
+// when the real timer itself ends.
+ensureColumn('users', 'prep_enabled', 'prep_enabled INTEGER NOT NULL DEFAULT 0');
+ensureColumn('users', 'prep_duration_seconds', 'prep_duration_seconds INTEGER NOT NULL DEFAULT 15');
+
 export function userCount() {
     return db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
 }

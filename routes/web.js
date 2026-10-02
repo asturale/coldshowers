@@ -2,7 +2,7 @@ import express from 'express';
 import { requireLogin } from './middleware.js';
 import { findUserById, setUserLocale } from '../db/auth.js';
 import { logShower, listShowers, deleteShower, getCurrentStreak, getLongestStreak, chartData, totalCount, localDateStr, showersCountByDayInMonth, showersOnDate } from '../db/showers.js';
-import { setTargetDuration, setReminder, setNotificationSettings, REMINDER_METHODS } from '../db/settings.js';
+import { setTargetDuration, setPrepCountdown, setReminder, setNotificationSettings, REMINDER_METHODS } from '../db/settings.js';
 import { sendReminder } from '../lib/notify.js';
 import { SUPPORTED_LOCALES } from '../lib/i18n.js';
 import { saveSubscription, removeSubscription, hasSubscription } from '../db/push.js';
@@ -16,6 +16,8 @@ function dashboardLocals(req) {
     return {
         user,
         targetSeconds: user.target_duration_seconds,
+        prepEnabled: !!user.prep_enabled,
+        prepSeconds: user.prep_duration_seconds,
         showers: listShowers(30),
         totalCount: totalCount(),
         currentStreak: getCurrentStreak(),
@@ -111,6 +113,8 @@ function settingsLocals(req, extra) {
     return {
         user,
         targetSeconds: user.target_duration_seconds,
+        prepEnabled: !!user.prep_enabled,
+        prepSeconds: user.prep_duration_seconds,
         reminderEnabled: !!user.reminder_enabled,
         reminderTime: user.reminder_time,
         reminderMethod: user.reminder_method,
@@ -130,6 +134,11 @@ function settingsLocals(req, extra) {
 
 router.get('/settings', (req, res) => {
     res.render('settings', settingsLocals(req));
+});
+
+router.post('/settings/prep-countdown', (req, res) => {
+    setPrepCountdown(req.session.userId, { enabled: req.body.enabled === 'on', seconds: req.body.seconds });
+    res.redirect('/settings');
 });
 
 router.post('/settings/target-duration', (req, res) => {
