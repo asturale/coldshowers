@@ -1,6 +1,6 @@
 {
   "name": "coldshowers",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Self-hosted cold shower tracker with timer, streaks, charts, and reminders",
   "type": "module",
   "main": "server.js",
