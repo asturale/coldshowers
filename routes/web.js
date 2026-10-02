@@ -5,6 +5,8 @@ import { logShower, listShowers, deleteShower, getCurrentStreak, getLongestStrea
 import { setTargetDuration, setReminder, setNotificationSettings, REMINDER_METHODS } from '../db/settings.js';
 import { sendReminder } from '../lib/notify.js';
 import { SUPPORTED_LOCALES } from '../lib/i18n.js';
+import { saveSubscription, removeSubscription, hasSubscription } from '../db/push.js';
+import { VAPID_PUBLIC } from '../lib/push.js';
 
 const router = express.Router();
 router.use(requireLogin);
@@ -118,6 +120,8 @@ function settingsLocals(req, extra) {
         ntfyToken: user.ntfy_token,
         telegramBotToken: user.telegram_bot_token,
         telegramChatId: user.telegram_chat_id,
+        vapidPublicKey: VAPID_PUBLIC,
+        pushSubscribed: hasSubscription(user.id),
         storedLocale: user.locale,
         testResult: null,
         ...extra,
@@ -158,6 +162,16 @@ router.post('/settings/notifications/test', async (req, res) => {
     } catch (e) {
         res.render('settings', settingsLocals(req, { testResult: 'error' }));
     }
+});
+
+router.post('/push-subscribe', (req, res) => {
+    saveSubscription(req.session.userId, req.body);
+    res.json({ ok: true });
+});
+
+router.post('/push-unsubscribe', (req, res) => {
+    if (req.body.endpoint) removeSubscription(req.body.endpoint);
+    res.json({ ok: true });
 });
 
 router.post('/settings/locale', (req, res) => {

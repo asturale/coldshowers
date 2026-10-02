@@ -1,6 +1,6 @@
 import { db } from './index.js';
 
-export const REMINDER_METHODS = ['none', 'ntfy', 'telegram'];
+export const REMINDER_METHODS = ['none', 'ntfy', 'telegram', 'webpush'];
 
 export function setTargetDuration(userId, seconds) {
     const n = Math.max(1, Math.min(3600, Math.round(Number(seconds)) || 120));
