@@ -1,5 +1,6 @@
 {
   "nav.dashboard": "Overzicht",
+  "nav.calendar": "Kalender",
   "nav.settings": "Instellingen",
   "nav.logout": "Uitloggen",
 
@@ -64,6 +65,21 @@
   "settings.test_error": "Versturen van de testmelding is mislukt — controleer je instellingen.",
   "settings.language_heading": "Taal",
   "settings.language_auto": "Automatisch (browsertaal)",
+
+  "calendar.title": "Kalender",
+  "calendar.help": "Tik op een dag om 'm te bekijken of een sessie toe te voegen — ook voor dagen die je vergat te loggen.",
+  "calendar.back": "Kalender",
+  "calendar.mon": "Ma",
+  "calendar.tue": "Di",
+  "calendar.wed": "Wo",
+  "calendar.thu": "Do",
+  "calendar.fri": "Vr",
+  "calendar.sat": "Za",
+  "calendar.sun": "Zo",
+  "calendar.add_entry": "Sessie toevoegen voor deze dag",
+  "calendar.time_label": "Tijdstip",
+  "calendar.duration_label": "Duur (seconden)",
+  "calendar.add_button": "Toevoegen",
 
   "reminder.title": "Koude Douches",
   "reminder.body": "Herinnering: heb je vandaag al je koude douche genomen?",

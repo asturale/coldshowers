@@ -3,6 +3,7 @@
   <% if (user) { %>
   <nav>
     <a href="/"><%= t('nav.dashboard') %></a>
+    <a href="/calendar"><%= t('nav.calendar') %></a>
     <a href="/settings"><%= t('nav.settings') %></a>
     <form method="post" action="/logout" style="display:inline;margin:0;">
       <button type="submit" class="secondary" style="padding:0.3em 0.8em; font-size:0.85em;"><%= t('nav.logout') %></button>
