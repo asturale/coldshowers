@@ -6,6 +6,10 @@
   <p class="page-sub"><%= t('dashboard.target_label', { duration: Math.floor(targetSeconds/60) + ':' + String(targetSeconds%60).padStart(2,'0') }) %></p>
 
   <div class="card">
+    <div class="timer-mode-toggle">
+      <button type="button" id="modeStopwatchBtn" class="mode-btn active"><%= t('dashboard.mode_stopwatch') %></button>
+      <button type="button" id="modeCountdownBtn" class="mode-btn"><%= t('dashboard.mode_countdown') %></button>
+    </div>
     <div class="timer-display" id="timerDisplay">00:00</div>
     <div class="timer-actions">
       <button type="button" id="timerStartBtn"><%= t('dashboard.timer_start') %></button>
@@ -105,45 +109,105 @@
 <% } %>
 
 <script>
+  const TARGET_SECONDS = <%- JSON.stringify(targetSeconds) %>;
+  const DONE_TEXT = <%- JSON.stringify(t('dashboard.countdown_done')) %>;
+
+  let mode = 'stopwatch'; // 'stopwatch' | 'countdown'
   let startTime = null;
   let tickHandle = null;
+  let autoCompleted = false;
   const display = document.getElementById('timerDisplay');
   const startBtn = document.getElementById('timerStartBtn');
   const stopBtn = document.getElementById('timerStopBtn');
+  const modeStopwatchBtn = document.getElementById('modeStopwatchBtn');
+  const modeCountdownBtn = document.getElementById('modeCountdownBtn');
 
-  function formatElapsed(ms) {
-    const totalSeconds = Math.floor(ms / 1000);
-    const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-    const s = String(totalSeconds % 60).padStart(2, '0');
+  function formatSeconds(totalSeconds) {
+    const clamped = Math.max(0, totalSeconds);
+    const m = String(Math.floor(clamped / 60)).padStart(2, '0');
+    const s = String(clamped % 60).padStart(2, '0');
     return `${m}:${s}`;
   }
 
-  function tick() {
-    display.textContent = formatElapsed(Date.now() - startTime);
+  // A short two-tone beep via Web Audio -- no audio file needed, and it
+  // works even if the tab lost focus while counting down in the shower.
+  function playBeep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      osc.start();
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc.stop(ctx.currentTime + 0.6);
+    } catch {
+      // Web Audio unavailable (e.g. autoplay policy) -- the visual "Done!" state still shows.
+    }
   }
 
-  startBtn.addEventListener('click', () => {
-    startTime = Date.now();
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-    tickHandle = setInterval(tick, 250);
-  });
-
-  stopBtn.addEventListener('click', () => {
-    clearInterval(tickHandle);
-    const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
-
+  function submitLog(durationSeconds) {
     const form = document.createElement('form');
     form.method = 'post';
     form.action = '/log';
     const input = document.createElement('input');
     input.type = 'hidden';
     input.name = 'duration_seconds';
-    input.value = elapsedSeconds;
+    input.value = durationSeconds;
     form.appendChild(input);
     document.body.appendChild(form);
     form.submit();
+  }
+
+  function resetButtons() {
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+  }
+
+  function tick() {
+    const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+    if (mode === 'stopwatch') {
+      display.textContent = formatSeconds(elapsedSeconds);
+      return;
+    }
+    const remaining = TARGET_SECONDS - elapsedSeconds;
+    if (remaining <= 0 && !autoCompleted) {
+      autoCompleted = true;
+      clearInterval(tickHandle);
+      display.textContent = DONE_TEXT;
+      playBeep();
+      resetButtons();
+      submitLog(TARGET_SECONDS);
+      return;
+    }
+    display.textContent = formatSeconds(remaining);
+  }
+
+  function setMode(newMode) {
+    mode = newMode;
+    modeStopwatchBtn.classList.toggle('active', mode === 'stopwatch');
+    modeCountdownBtn.classList.toggle('active', mode === 'countdown');
+    display.textContent = mode === 'countdown' ? formatSeconds(TARGET_SECONDS) : '00:00';
+  }
+
+  modeStopwatchBtn.addEventListener('click', () => setMode('stopwatch'));
+  modeCountdownBtn.addEventListener('click', () => setMode('countdown'));
+
+  startBtn.addEventListener('click', () => {
+    startTime = Date.now();
+    autoCompleted = false;
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    tickHandle = setInterval(tick, 250);
+  });
+
+  stopBtn.addEventListener('click', () => {
+    if (autoCompleted) return; // already auto-submitted when the countdown hit zero
+    clearInterval(tickHandle);
+    const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
+    resetButtons();
+    submitLog(elapsedSeconds);
   });
 </script>
