@@ -10,6 +10,7 @@
       <button type="button" id="modeStopwatchBtn" class="mode-btn active"><%= t('dashboard.mode_stopwatch') %></button>
       <button type="button" id="modeCountdownBtn" class="mode-btn"><%= t('dashboard.mode_countdown') %></button>
     </div>
+    <div class="timer-phase-label" id="timerPhaseLabel"></div>
     <div class="timer-display" id="timerDisplay">00:00</div>
     <div class="timer-actions">
       <button type="button" id="timerStartBtn"><%= t('dashboard.timer_start') %></button>
@@ -111,14 +112,19 @@
 <script>
   const TARGET_SECONDS = <%- JSON.stringify(targetSeconds) %>;
   const DONE_TEXT = <%- JSON.stringify(t('dashboard.countdown_done')) %>;
+  const PREP_ENABLED = <%- JSON.stringify(prepEnabled) %>;
+  const PREP_SECONDS = <%- JSON.stringify(prepSeconds) %>;
+  const PREP_LABEL = <%- JSON.stringify(t('dashboard.prep_label')) %>;
 
   let mode = 'stopwatch'; // 'stopwatch' | 'countdown'
+  let phase = 'idle'; // 'idle' | 'prep' | 'active' -- see startPrepPhase/startActivePhase
   let startTime = null;
   let tickHandle = null;
   let autoCompleted = false;
   let running = false;
   let countdownSeconds = TARGET_SECONDS; // editable per-session override, see enableDisplayEdit()
   const display = document.getElementById('timerDisplay');
+  const phaseLabel = document.getElementById('timerPhaseLabel');
   const startBtn = document.getElementById('timerStartBtn');
   const stopBtn = document.getElementById('timerStopBtn');
   const modeStopwatchBtn = document.getElementById('modeStopwatchBtn');
@@ -178,6 +184,7 @@
     if (remaining <= 0 && !autoCompleted) {
       autoCompleted = true;
       running = false;
+      phase = 'idle';
       clearInterval(tickHandle);
       display.textContent = DONE_TEXT;
       playBeep();
@@ -186,6 +193,40 @@
       return;
     }
     display.textContent = formatSeconds(remaining);
+  }
+
+  // The optional "get ready" phase runs BEFORE the real timer so there's
+  // time to step under the shower after tapping Start. A beep marks the
+  // handoff into the real cold-shower time, which is what actually gets
+  // logged -- prep time itself is never included in the logged duration.
+  function prepTick() {
+    const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+    const remaining = PREP_SECONDS - elapsedSeconds;
+    if (remaining <= 0) {
+      clearInterval(tickHandle);
+      playBeep();
+      startActivePhase();
+      return;
+    }
+    display.textContent = formatSeconds(remaining);
+  }
+
+  function startActivePhase() {
+    phase = 'active';
+    phaseLabel.textContent = '';
+    startTime = Date.now();
+    autoCompleted = false;
+    running = true;
+    tickHandle = setInterval(tick, 250);
+  }
+
+  function startPrepPhase() {
+    phase = 'prep';
+    running = true;
+    startTime = Date.now();
+    phaseLabel.textContent = PREP_LABEL;
+    display.textContent = formatSeconds(PREP_SECONDS);
+    tickHandle = setInterval(prepTick, 250);
   }
 
   function setMode(newMode) {
@@ -233,18 +274,30 @@
   modeCountdownBtn.addEventListener('click', () => setMode('countdown'));
 
   startBtn.addEventListener('click', () => {
-    startTime = Date.now();
-    autoCompleted = false;
-    running = true;
     startBtn.disabled = true;
     stopBtn.disabled = false;
-    tickHandle = setInterval(tick, 250);
+    if (PREP_ENABLED) {
+      startPrepPhase();
+    } else {
+      startActivePhase();
+    }
   });
 
   stopBtn.addEventListener('click', () => {
+    if (phase === 'prep') {
+      // Cancelled during "get ready" -- nothing to log, just reset.
+      clearInterval(tickHandle);
+      phase = 'idle';
+      running = false;
+      phaseLabel.textContent = '';
+      display.textContent = mode === 'countdown' ? formatSeconds(countdownSeconds) : '00:00';
+      resetButtons();
+      return;
+    }
     if (autoCompleted) return; // already auto-submitted when the countdown hit zero
     clearInterval(tickHandle);
     running = false;
+    phase = 'idle';
     const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
     resetButtons();
     submitLog(elapsedSeconds);
