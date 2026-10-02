@@ -22,6 +22,9 @@
 
   "dashboard.title": "Koude Douches",
   "dashboard.target_label": "Streefduur: {duration}",
+  "dashboard.mode_stopwatch": "Stopwatch",
+  "dashboard.mode_countdown": "Aftellen",
+  "dashboard.countdown_done": "Klaar!",
   "dashboard.timer_start": "Start",
   "dashboard.timer_stop": "Stop & log",
   "dashboard.quick_log": "Log streefduur ({duration}) nu",

@@ -22,6 +22,9 @@
 
   "dashboard.title": "Cold Showers",
   "dashboard.target_label": "Target: {duration}",
+  "dashboard.mode_stopwatch": "Stopwatch",
+  "dashboard.mode_countdown": "Countdown",
+  "dashboard.countdown_done": "Done!",
   "dashboard.timer_start": "Start",
   "dashboard.timer_stop": "Stop & log",
   "dashboard.quick_log": "Log target ({duration}) now",
