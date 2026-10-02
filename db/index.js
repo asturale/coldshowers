@@ -64,6 +64,18 @@ CREATE TABLE IF NOT EXISTS showers (
     created_at       INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_showers_started ON showers(started_at);
+
+-- Browser Web Push subscriptions, for the 'webpush' reminder method. A
+-- user can have more than one (e.g. phone + laptop), so this is its own
+-- table rather than columns on users.
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    endpoint   TEXT NOT NULL UNIQUE,
+    p256dh     TEXT NOT NULL,
+    auth       TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+);
 `);
 
 export function userCount() {
