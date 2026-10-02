@@ -137,20 +137,27 @@
     return `${m}:${s}`;
   }
 
-  // A short two-tone beep via Web Audio -- no audio file needed, and it
-  // works even if the tab lost focus while counting down in the shower.
+  // A clear triple-pulse alarm via Web Audio -- no audio file needed, and it
+  // works even if the tab lost focus while counting down in the shower. A
+  // square wave at full volume cuts through running water much better than
+  // a single soft sine-wave fade.
   function playBeep() {
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.value = 880;
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      osc.start();
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-      osc.stop(ctx.currentTime + 0.6);
+      const now = ctx.currentTime;
+      [0, 0.22, 0.44].forEach((t) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'square';
+        osc.frequency.value = 1046; // C6 -- cuts through better than a lower tone
+        gain.gain.setValueAtTime(0.0001, now + t);
+        gain.gain.exponentialRampToValueAtTime(0.35, now + t + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + t + 0.18);
+        osc.start(now + t);
+        osc.stop(now + t + 0.2);
+      });
     } catch {
       // Web Audio unavailable (e.g. autoplay policy) -- the visual "Done!" state still shows.
     }
@@ -235,6 +242,11 @@
     modeCountdownBtn.classList.toggle('active', mode === 'countdown');
     display.textContent = mode === 'countdown' ? formatSeconds(countdownSeconds) : '00:00';
     display.classList.toggle('editable', mode === 'countdown');
+    try {
+      localStorage.setItem('coldshowers.mode', mode);
+    } catch {
+      // Storage unavailable (private browsing, blocked site data) -- mode just won't persist.
+    }
   }
 
   // Tap the display while in countdown mode (and not running) to type a
@@ -272,6 +284,14 @@
 
   modeStopwatchBtn.addEventListener('click', () => setMode('stopwatch'));
   modeCountdownBtn.addEventListener('click', () => setMode('countdown'));
+
+  // Restore the last-used mode (stopwatch vs. countdown) on page load.
+  try {
+    const storedMode = localStorage.getItem('coldshowers.mode');
+    if (storedMode === 'countdown') setMode('countdown');
+  } catch {
+    // Storage unavailable -- default stopwatch mode from the initial markup stands.
+  }
 
   startBtn.addEventListener('click', () => {
     startBtn.disabled = true;

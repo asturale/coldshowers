@@ -47,34 +47,37 @@
     <form method="post" action="/settings/notifications" class="stacked">
       <div class="radio-row">
         <% reminderMethods.forEach(function(m) { %>
-        <label><input type="radio" name="method" value="<%= m %>" <%= reminderMethod === m ? 'checked' : '' %>> <%= t('settings.method_' + m) %></label>
+        <label><input type="radio" name="method" class="method-radio" value="<%= m %>" <%= reminderMethod === m ? 'checked' : '' %>> <%= t('settings.method_' + m) %></label>
         <% }) %>
       </div>
 
-      <label><%= t('settings.ntfy_base_url') %></label>
-      <input type="text" name="ntfy_base_url" value="<%= ntfyBaseUrl %>" placeholder="https://ntfy.sh">
-      <label><%= t('settings.ntfy_topic') %></label>
-      <input type="text" name="ntfy_topic" value="<%= ntfyTopic || '' %>" placeholder="coldshowers-yourname">
-      <label><%= t('settings.ntfy_token') %></label>
-      <input type="password" name="ntfy_token" value="<%= ntfyToken || '' %>" placeholder="<%= t('settings.optional') %>">
+      <div class="method-fields" data-method="ntfy">
+        <label><%= t('settings.ntfy_base_url') %></label>
+        <input type="text" name="ntfy_base_url" value="<%= ntfyBaseUrl %>" placeholder="https://ntfy.sh">
+        <label><%= t('settings.ntfy_topic') %></label>
+        <input type="text" name="ntfy_topic" value="<%= ntfyTopic || '' %>" placeholder="coldshowers-yourname">
+        <label><%= t('settings.ntfy_token') %></label>
+        <input type="password" name="ntfy_token" value="<%= ntfyToken || '' %>" placeholder="<%= t('settings.optional') %>">
+      </div>
 
-      <label><%= t('settings.telegram_bot_token') %></label>
-      <input type="password" name="telegram_bot_token" value="<%= telegramBotToken || '' %>">
-      <label><%= t('settings.telegram_chat_id') %></label>
-      <input type="text" name="telegram_chat_id" value="<%= telegramChatId || '' %>">
+      <div class="method-fields" data-method="telegram">
+        <label><%= t('settings.telegram_bot_token') %></label>
+        <input type="password" name="telegram_bot_token" value="<%= telegramBotToken || '' %>">
+        <label><%= t('settings.telegram_chat_id') %></label>
+        <input type="text" name="telegram_chat_id" value="<%= telegramChatId || '' %>">
+      </div>
+
+      <div class="method-fields" data-method="webpush">
+        <p class="help-text"><%= t('settings.push_help') %></p>
+        <div id="push-status" style="margin: 0.6em 0; font-size: 0.9em; color: var(--text-dim);"></div>
+        <button type="button" id="push-toggle" class="secondary"></button>
+      </div>
 
       <p><button type="submit"><%= t('settings.save') %></button></p>
     </form>
-    <form method="post" action="/settings/notifications/test">
+    <form method="post" action="/settings/notifications/test" class="method-fields" data-method="ntfy telegram webpush">
       <button type="submit" class="secondary"><%= t('settings.test_button') %></button>
     </form>
-  </div>
-
-  <div class="card">
-    <h2 style="margin-top:0"><%= t('settings.push_heading') %></h2>
-    <p class="help-text"><%= t('settings.push_help') %></p>
-    <div id="push-status" style="margin: 0.6em 0; font-size: 0.9em; color: var(--text-dim);"></div>
-    <button type="button" id="push-toggle" class="secondary"></button>
   </div>
 
   <div class="card">
@@ -89,8 +92,27 @@
       <button type="submit"><%= t('settings.save') %></button>
     </form>
   </div>
+
+  <div class="card">
+    <form method="post" action="/logout">
+      <button type="submit" class="secondary" style="width:100%"><%= t('nav.logout') %></button>
+    </form>
+  </div>
 </main>
 <script>
+  // Show only the fields relevant to the currently-selected notification
+  // method, instead of always showing every method's fields at once.
+  const methodRadios = document.querySelectorAll('.method-radio');
+  const methodFieldGroups = document.querySelectorAll('.method-fields');
+  function updateMethodFields() {
+    const selected = document.querySelector('.method-radio:checked')?.value;
+    methodFieldGroups.forEach((el) => {
+      el.style.display = el.dataset.method.split(' ').includes(selected) ? '' : 'none';
+    });
+  }
+  methodRadios.forEach((r) => r.addEventListener('change', updateMethodFields));
+  updateMethodFields();
+
   const VAPID_PUBLIC_KEY = <%- JSON.stringify(vapidPublicKey) %>;
   const S = <%- JSON.stringify({
       notSupported: t('settings.push_not_supported'), enable: t('settings.push_enable'),

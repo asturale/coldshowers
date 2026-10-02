@@ -37,10 +37,17 @@
   a:hover { color: var(--accent-hover); }
   h1, h2, h3 { font-weight: 700; letter-spacing: -0.01em; }
 
-  header.topbar { position: sticky; top: 0; z-index: 10; padding: 0.7em 1.5em; background: rgba(16,32,47,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  header.topbar { position: sticky; top: 0; z-index: 10; padding: 0.6em 1em; background: rgba(16,32,47,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; row-gap: 0.4em; align-items: center; justify-content: space-between; }
   header.topbar .brand { display: flex; align-items: center; gap: 0.5em; font-weight: 800; font-size: 1.1em; color: var(--text); }
-  header.topbar nav { display: flex; align-items: center; gap: 1.2em; }
+  header.topbar .brand-icon { width: 24px; height: 24px; border-radius: 6px; display: block; }
+  header.topbar nav { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9em; }
   header.topbar nav a { font-weight: 600; font-size: 0.92em; color: var(--text-dim); }
+  @media (max-width: 420px) {
+    header.topbar { padding: 0.6em 0.8em; }
+    header.topbar .brand-text { display: none; }
+    header.topbar nav { gap: 0.7em; }
+    header.topbar nav a { font-size: 0.85em; }
+  }
   header.topbar nav a:hover { color: var(--text); }
 
   main { max-width: 640px; margin: 0 auto; padding: 2em 1.5em 4em; }
