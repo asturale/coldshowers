@@ -1,5 +1,6 @@
 {
   "nav.dashboard": "Dashboard",
+  "nav.calendar": "Calendar",
   "nav.settings": "Settings",
   "nav.logout": "Log out",
 
@@ -64,6 +65,21 @@
   "settings.test_error": "Sending the test notification failed — check your settings.",
   "settings.language_heading": "Language",
   "settings.language_auto": "Automatic (browser language)",
+
+  "calendar.title": "Calendar",
+  "calendar.help": "Tap a day to view or add an entry — including for past days you forgot to log.",
+  "calendar.back": "Calendar",
+  "calendar.mon": "Mon",
+  "calendar.tue": "Tue",
+  "calendar.wed": "Wed",
+  "calendar.thu": "Thu",
+  "calendar.fri": "Fri",
+  "calendar.sat": "Sat",
+  "calendar.sun": "Sun",
+  "calendar.add_entry": "Add an entry for this day",
+  "calendar.time_label": "Time",
+  "calendar.duration_label": "Duration (seconds)",
+  "calendar.add_button": "Add",
 
   "reminder.title": "Cold Showers",
   "reminder.body": "Reminder: have you taken your cold shower today?",

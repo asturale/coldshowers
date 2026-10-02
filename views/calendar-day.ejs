@@ -1,0 +1,34 @@
+<% var title = dateStr %>
+<%- include('partials/head', { title }) %>
+<%- include('partials/nav') %>
+<main>
+  <p><a href="/calendar">&larr; <%= t('calendar.back') %></a></p>
+  <h1 class="page-title"><%= new Date(dateStr + 'T00:00:00').toLocaleDateString(dateLocale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></h1>
+
+  <% if (showers.length > 0) { %>
+  <div class="card">
+    <% showers.forEach(function(s) { %>
+    <div class="day-detail-entry">
+      <span><%= new Date(s.started_at).toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit' }) %> &middot; <%= Math.floor(s.duration_seconds/60) %>:<%= String(s.duration_seconds%60).padStart(2,'0') %></span>
+      <form method="post" action="/showers/<%= s.id %>/delete" onsubmit="return confirm('<%= t('dashboard.delete_confirm') %>')" style="margin:0;">
+        <input type="hidden" name="redirect" value="/calendar/<%= dateStr %>">
+        <button type="submit" class="danger" style="padding:0.3em 0.7em; font-size:0.8em;"><%= t('dashboard.delete') %></button>
+      </form>
+    </div>
+    <% }) %>
+  </div>
+  <% } %>
+
+  <div class="card">
+    <h2 style="margin-top:0; font-size:1.05em;"><%= t('calendar.add_entry') %></h2>
+    <form method="post" action="/calendar/<%= dateStr %>/log" class="stacked">
+      <label><%= t('calendar.time_label') %></label>
+      <input type="time" name="time" value="12:00">
+      <label><%= t('calendar.duration_label') %></label>
+      <input type="number" name="duration_seconds" min="1" value="<%= targetSeconds %>">
+      <p><button type="submit"><%= t('calendar.add_button') %></button></p>
+    </form>
+  </div>
+</main>
+</body>
+</html>

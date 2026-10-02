@@ -22,7 +22,7 @@ export function totalCount() {
 // 'YYYY-MM-DD' in the server's own local TZ (compose.yaml sets
 // TZ=Europe/Amsterdam) -- deliberately NOT toISOString(), which is UTC and
 // would file a shower under the wrong calendar day near midnight.
-function localDateStr(d) {
+export function localDateStr(d) {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
@@ -64,6 +64,29 @@ export function getLongestStreak() {
         longest = Math.max(longest, current);
     }
     return longest;
+}
+
+// Showers grouped by calendar day for a given month (1-indexed), for the
+// calendar view's per-day indicators.
+export function showersCountByDayInMonth(year, month) {
+    const start = new Date(year, month - 1, 1).getTime();
+    const end = new Date(year, month, 1).getTime();
+    const rows = db.prepare('SELECT started_at FROM showers WHERE started_at >= ? AND started_at < ?').all(start, end);
+    const counts = new Map();
+    for (const r of rows) {
+        const key = localDateStr(new Date(r.started_at));
+        counts.set(key, (counts.get(key) || 0) + 1);
+    }
+    return counts;
+}
+
+// All showers logged on one specific calendar day ('YYYY-MM-DD'), for the
+// calendar day-detail view (also where retroactive entries get added).
+export function showersOnDate(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const start = new Date(y, m - 1, d).getTime();
+    const end = new Date(y, m - 1, d + 1).getTime();
+    return db.prepare('SELECT * FROM showers WHERE started_at >= ? AND started_at < ? ORDER BY started_at ASC').all(start, end);
 }
 
 // Chart data: one point per logged shower, oldest first, capped so a

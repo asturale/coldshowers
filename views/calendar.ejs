@@ -1,0 +1,29 @@
+<% var title = t('calendar.title') %>
+<%- include('partials/head', { title }) %>
+<%- include('partials/nav') %>
+<main>
+  <h1 class="page-title"><%= t('calendar.title') %></h1>
+  <p class="page-sub"><%= t('calendar.help') %></p>
+
+  <div class="card">
+    <div class="calendar-header">
+      <a class="secondary-link" href="/calendar?year=<%= prevYear %>&month=<%= prevMonth %>">&larr;</a>
+      <span class="calendar-month-label"><%= monthLabel %></span>
+      <a class="secondary-link" href="/calendar?year=<%= nextYear %>&month=<%= nextMonth %>">&rarr;</a>
+    </div>
+    <div class="calendar-grid">
+      <% [t('calendar.mon'), t('calendar.tue'), t('calendar.wed'), t('calendar.thu'), t('calendar.fri'), t('calendar.sat'), t('calendar.sun')].forEach(function(label) { %>
+      <div class="calendar-weekday"><%= label %></div>
+      <% }) %>
+      <% for (let i = 0; i < firstWeekday; i++) { %><div class="calendar-day empty"></div><% } %>
+      <% days.forEach(function(day) { %>
+      <a class="calendar-day <%= day.count > 0 ? 'logged' : '' %> <%= day.isToday ? 'today' : '' %>" href="/calendar/<%= day.dateStr %>">
+        <span class="day-number"><%= day.day %></span>
+        <% if (day.count > 0) { %><span class="day-dot"></span><% } %>
+      </a>
+      <% }) %>
+    </div>
+  </div>
+</main>
+</body>
+</html>

@@ -85,6 +85,21 @@
   .radio-row { display: flex; gap: 1.2em; margin: 0.5em 0 1em; }
   .radio-row label { display: flex; align-items: center; gap: 0.4em; font-weight: 600; font-size: 0.9em; color: var(--text); margin: 0; }
   .help-text { font-size: 0.82em; color: var(--text-faint); margin: 0.3em 0 0.9em; }
+
+  .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1em; }
+  .calendar-month-label { font-weight: 700; font-size: 1.05em; }
+  .secondary-link { color: var(--text-dim); font-size: 1.2em; padding: 0.2em 0.6em; border-radius: var(--radius-sm); }
+  .secondary-link:hover { background: var(--surface-hover); color: var(--text); }
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.3em; }
+  .calendar-weekday { text-align: center; font-size: 0.72em; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.03em; padding-bottom: 0.4em; }
+  .calendar-day { position: relative; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); color: var(--text); font-size: 0.9em; background: var(--surface-hover); }
+  .calendar-day:hover { background: var(--border); color: var(--text); }
+  .calendar-day.empty { background: transparent; }
+  .calendar-day.today { border: 1px solid var(--accent); }
+  .calendar-day.logged { background: var(--accent-dim); color: var(--accent-hover); font-weight: 700; }
+  .calendar-day .day-dot { position: absolute; bottom: 0.25em; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+  .day-detail-entry { display: flex; justify-content: space-between; align-items: center; padding: 0.5em 0; border-bottom: 1px solid var(--border); font-size: 0.9em; }
+  .day-detail-entry:last-child { border-bottom: none; }
 </style>
 </head>
 <body>
