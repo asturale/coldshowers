@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><%= typeof title !== 'undefined' ? title + ' — Cold Showers' : 'Cold Showers' %></title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0b1420">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cold Showers">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
   :root {
     color-scheme: dark;
@@ -104,5 +111,13 @@
   .day-detail-entry { display: flex; justify-content: space-between; align-items: center; padding: 0.5em 0; border-bottom: 1px solid var(--border); font-size: 0.9em; }
   .day-detail-entry:last-child { border-bottom: none; }
 </style>
+<script>
+  // Register proactively on every page (not just the push-enable flow in
+  // settings) so the PWA installability criteria are met as soon as the
+  // app is opened at all.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+  }
+</script>
 </head>
 <body>
