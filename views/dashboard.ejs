@@ -1,0 +1,149 @@
+<% var title = t('dashboard.title') %>
+<%- include('partials/head', { title }) %>
+<%- include('partials/nav') %>
+<main>
+  <h1 class="page-title"><%= t('dashboard.title') %></h1>
+  <p class="page-sub"><%= t('dashboard.target_label', { duration: Math.floor(targetSeconds/60) + ':' + String(targetSeconds%60).padStart(2,'0') }) %></p>
+
+  <div class="card">
+    <div class="timer-display" id="timerDisplay">00:00</div>
+    <div class="timer-actions">
+      <button type="button" id="timerStartBtn"><%= t('dashboard.timer_start') %></button>
+      <button type="button" id="timerStopBtn" class="secondary" disabled><%= t('dashboard.timer_stop') %></button>
+    </div>
+    <div class="quick-log">
+      <form method="post" action="/log">
+        <input type="hidden" name="duration_seconds" value="<%= targetSeconds %>">
+        <button type="submit" class="secondary"><%= t('dashboard.quick_log', { duration: Math.floor(targetSeconds/60) + ':' + String(targetSeconds%60).padStart(2,'0') }) %></button>
+      </form>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-tile">
+      <div class="value"><%= currentStreak %></div>
+      <div class="label"><%= t('dashboard.current_streak') %></div>
+    </div>
+    <div class="stat-tile">
+      <div class="value"><%= longestStreak %></div>
+      <div class="label"><%= t('dashboard.longest_streak') %></div>
+    </div>
+    <div class="stat-tile">
+      <div class="value"><%= totalCount %></div>
+      <div class="label"><%= t('dashboard.total_showers') %></div>
+    </div>
+  </div>
+
+  <% if (chart.length > 0) { %>
+  <div class="card">
+    <h2 style="margin-top:0; font-size:1.1em;"><%= t('dashboard.chart_heading') %></h2>
+    <canvas id="progressChart" height="200"></canvas>
+  </div>
+  <% } %>
+
+  <% if (showers.length === 0) { %>
+  <div class="empty-state card"><%= t('dashboard.empty') %></div>
+  <% } else { %>
+  <div class="card">
+    <h2 style="margin-top:0; font-size:1.1em;"><%= t('dashboard.history_heading') %></h2>
+    <table>
+      <tr><th><%= t('dashboard.col_date') %></th><th><%= t('dashboard.col_duration') %></th><th></th></tr>
+      <% showers.forEach(function(s) { %>
+      <tr>
+        <td><%= new Date(s.started_at).toLocaleString(dateLocale) %></td>
+        <td class="num"><%= Math.floor(s.duration_seconds/60) %>:<%= String(s.duration_seconds%60).padStart(2,'0') %></td>
+        <td style="text-align:right">
+          <form method="post" action="/showers/<%= s.id %>/delete" onsubmit="return confirm('<%= t('dashboard.delete_confirm') %>')" style="margin:0;">
+            <button type="submit" class="danger" style="padding:0.3em 0.7em; font-size:0.8em;"><%= t('dashboard.delete') %></button>
+          </form>
+        </td>
+      </tr>
+      <% }) %>
+    </table>
+  </div>
+  <% } %>
+</main>
+
+<% if (chart.length > 0) { %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+  const chartData = <%- JSON.stringify(chart) %>;
+  const ctx = document.getElementById('progressChart');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: chartData.map((d) => d.date),
+      datasets: [
+        {
+          label: <%- JSON.stringify(t('dashboard.chart_duration_label')) %>,
+          data: chartData.map((d) => d.durationSeconds),
+          borderColor: '#38bdf8',
+          backgroundColor: 'rgba(56,189,248,0.15)',
+          tension: 0.25,
+          fill: true,
+        },
+        {
+          label: <%- JSON.stringify(t('dashboard.chart_target_label')) %>,
+          data: chartData.map((d) => d.targetSeconds),
+          borderColor: '#5f7891',
+          borderDash: [4, 4],
+          pointRadius: 0,
+          fill: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { ticks: { color: '#93acc4' }, grid: { color: '#1f3346' } },
+        y: { ticks: { color: '#93acc4' }, grid: { color: '#1f3346' } },
+      },
+      plugins: { legend: { labels: { color: '#e7f1fb' } } },
+    },
+  });
+</script>
+<% } %>
+
+<script>
+  let startTime = null;
+  let tickHandle = null;
+  const display = document.getElementById('timerDisplay');
+  const startBtn = document.getElementById('timerStartBtn');
+  const stopBtn = document.getElementById('timerStopBtn');
+
+  function formatElapsed(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+    const s = String(totalSeconds % 60).padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function tick() {
+    display.textContent = formatElapsed(Date.now() - startTime);
+  }
+
+  startBtn.addEventListener('click', () => {
+    startTime = Date.now();
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    tickHandle = setInterval(tick, 250);
+  });
+
+  stopBtn.addEventListener('click', () => {
+    clearInterval(tickHandle);
+    const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = '/log';
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'duration_seconds';
+    input.value = elapsedSeconds;
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+  });
+</script>

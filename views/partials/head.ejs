@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="<%= locale %>">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= typeof title !== 'undefined' ? title + ' — Cold Showers' : 'Cold Showers' %></title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0b1420;
+    --surface: #10202f;
+    --surface-hover: #16283a;
+    --border: #1f3346;
+    --text: #e7f1fb;
+    --text-dim: #93acc4;
+    --text-faint: #5f7891;
+    --accent: #38bdf8;
+    --accent-hover: #67cdfb;
+    --accent-dim: rgba(56,189,248,0.15);
+    --danger: #e5484d;
+    --danger-dim: rgba(229,72,77,0.15);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.15);
+  }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-hover); }
+  h1, h2, h3 { font-weight: 700; letter-spacing: -0.01em; }
+
+  header.topbar { position: sticky; top: 0; z-index: 10; padding: 0.7em 1.5em; background: rgba(16,32,47,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  header.topbar .brand { display: flex; align-items: center; gap: 0.5em; font-weight: 800; font-size: 1.1em; color: var(--text); }
+  header.topbar nav { display: flex; align-items: center; gap: 1.2em; }
+  header.topbar nav a { font-weight: 600; font-size: 0.92em; color: var(--text-dim); }
+  header.topbar nav a:hover { color: var(--text); }
+
+  main { max-width: 640px; margin: 0 auto; padding: 2em 1.5em 4em; }
+  .page-title { font-size: 1.6em; margin: 0 0 0.25em; }
+  .page-sub { color: var(--text-dim); margin: 0 0 1.6em; font-size: 0.95em; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5em; margin-bottom: 1em; }
+
+  input, select, button { font-size: 0.95em; padding: 0.55em 0.85em; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: inherit; }
+  input:focus, select:focus { outline: none; border-color: var(--accent); }
+  button { cursor: pointer; border: 1px solid transparent; font-weight: 600; transition: background 0.15s, opacity 0.15s; }
+  button { background: var(--accent); color: #04202e; }
+  button:hover { background: var(--accent-hover); }
+  button.secondary { background: var(--surface-hover); color: var(--text); border-color: var(--border); }
+  button.secondary:hover { background: var(--border); }
+  button.danger { background: var(--danger-dim); color: #ff9a9d; border-color: transparent; }
+  button.danger:hover { background: var(--danger); color: #fff; }
+  button:disabled { opacity: 0.5; cursor: default; }
+
+  form.stacked label { display: block; margin: 0.9em 0 0.35em; font-size: 0.88em; color: var(--text-dim); font-weight: 600; }
+  form.stacked input, form.stacked select { width: 100%; }
+  form.stacked p:first-child label { margin-top: 0; }
+
+  .error { background: var(--danger-dim); border: 1px solid var(--danger); padding: 0.9em 1.1em; border-radius: var(--radius-md); margin-bottom: 1em; color: #ffb3b5; }
+  .success { background: var(--accent-dim); border: 1px solid var(--accent); padding: 0.9em 1.1em; border-radius: var(--radius-md); margin-bottom: 1em; color: var(--accent-hover); }
+  .center-form { max-width: 380px; margin: 4em auto; }
+  .center-form h1 { text-align: center; }
+
+  .timer-display { font-size: 3.2em; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; margin: 0.3em 0; letter-spacing: -0.02em; }
+  .timer-actions { display: flex; gap: 0.6em; justify-content: center; margin-top: 1em; }
+  .timer-actions button { flex: 1; max-width: 220px; padding: 0.85em; border-radius: 999px; font-size: 1.02em; }
+  .quick-log { text-align: center; margin-top: 1.2em; }
+
+  .stat-row { display: flex; gap: 0.8em; margin-bottom: 1em; }
+  .stat-tile { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1em; text-align: center; }
+  .stat-tile .value { font-size: 1.7em; font-weight: 800; color: var(--accent); }
+  .stat-tile .label { font-size: 0.78em; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 0.2em; }
+
+  table { width: 100%; border-collapse: collapse; }
+  td, th { text-align: left; padding: 0.6em 0.4em; border-bottom: 1px solid var(--border); font-size: 0.88em; }
+  th { color: var(--text-faint); font-weight: 600; font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.03em; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .empty-state { text-align: center; padding: 2.5em 1.5em; color: var(--text-dim); }
+
+  .radio-row { display: flex; gap: 1.2em; margin: 0.5em 0 1em; }
+  .radio-row label { display: flex; align-items: center; gap: 0.4em; font-weight: 600; font-size: 0.9em; color: var(--text); margin: 0; }
+  .help-text { font-size: 0.82em; color: var(--text-faint); margin: 0.3em 0 0.9em; }
+</style>
+</head>
+<body>
