@@ -32,9 +32,27 @@ A small self-hosted tracker for cold showers: a timer (with an optional pre-show
 
 ## Running it
 
-```sh
-docker compose up -d --build
+A ready-made image is published to GHCR on every release — no need to clone and build:
+
+```yaml
+# compose.yaml
+services:
+  app:
+    image: ghcr.io/asturale/coldshowers:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - SESSION_SECRET=change-me-to-a-long-random-string
+    volumes:
+      - ./data:/data
 ```
+
+```sh
+docker compose up -d
+```
+
+Prefer building from source instead? Clone this repo and run `docker compose up -d --build` (the included `compose.yaml` does exactly that).
 
 The app listens on port 3000 inside the container. Data is stored as SQLite under `./data` — back that directory up however you already back up the rest of your Docker volumes.
 
