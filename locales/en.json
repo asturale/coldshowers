@@ -3,12 +3,10 @@
   "nav.calendar": "Calendar",
   "nav.settings": "Settings",
   "nav.logout": "Log out",
-
   "login.username": "Username",
   "login.password": "Password",
   "login.submit": "Log in",
   "login.error": "Incorrect username or password.",
-
   "setup.title": "Setup",
   "setup.heading": "Welcome to Cold Showers",
   "setup.intro": "First launch — create your account.",
@@ -20,7 +18,6 @@
   "setup.error_password_short": "Password must be at least {min} characters.",
   "setup.error_password_common": "This password is too common and not secure enough — pick something unique.",
   "setup.error_mismatch": "Passwords do not match.",
-
   "dashboard.title": "Cold Showers",
   "dashboard.target_label": "Target: {duration}",
   "dashboard.mode_stopwatch": "Stopwatch",
@@ -42,7 +39,6 @@
   "dashboard.delete": "Delete",
   "dashboard.delete_confirm": "Delete this entry?",
   "dashboard.empty": "No cold showers logged yet — start the timer or tap the quick-log button above.",
-
   "settings.title": "Settings",
   "settings.save": "Save",
   "settings.optional": "optional",
@@ -51,6 +47,9 @@
   "settings.prep_heading": "Pre-shower countdown",
   "settings.prep_help": "Optional \"get ready\" countdown before the real timer starts, so you have time to step under the shower and turn it on. A sound plays when it ends (your cold-shower time begins) and when the main timer ends.",
   "settings.prep_enabled_label": "Enabled",
+  "settings.keep_screen_on_heading": "Keep screen on",
+  "settings.keep_screen_on_help": "Keeps the screen awake while the stopwatch/countdown is running, so your phone doesn't lock while you're in the (cold) shower. Works in the browser and as an installed PWA on Android; not supported everywhere (e.g. older iOS) -- just silently falls back to normal behaviour there.",
+  "settings.keep_screen_on_label": "Enabled",
   "settings.reminder_heading": "Daily reminder",
   "settings.reminder_help": "Get a daily nudge at a fixed time if you haven't logged a shower yet.",
   "settings.reminder_enabled_label": "Enabled",
@@ -77,7 +76,6 @@
   "settings.push_denied": "You've blocked notifications for this site — enable them in your browser settings to receive push notifications.",
   "settings.language_heading": "Language",
   "settings.language_auto": "Automatic (browser language)",
-
   "calendar.title": "Calendar",
   "calendar.help": "Tap a day to view or add an entry — including for past days you forgot to log.",
   "calendar.back": "Calendar",
@@ -92,7 +90,6 @@
   "calendar.time_label": "Time",
   "calendar.duration_label": "Duration (seconds)",
   "calendar.add_button": "Add",
-
   "reminder.title": "Cold Showers",
   "reminder.body": "Reminder: have you taken your cold shower today?",
   "reminder.test_body": "This is a test notification from Cold Showers."

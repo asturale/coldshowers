@@ -12,6 +12,10 @@ export function setPrepCountdown(userId, { enabled, seconds }) {
     db.prepare('UPDATE users SET prep_enabled = ?, prep_duration_seconds = ? WHERE id = ?').run(enabled ? 1 : 0, n, userId);
 }
 
+export function setKeepScreenOn(userId, enabled) {
+    db.prepare('UPDATE users SET keep_screen_on = ? WHERE id = ?').run(enabled ? 1 : 0, userId);
+}
+
 export function setReminder(userId, { enabled, time }) {
     const validTime = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) ? time : '07:00';
     db.prepare('UPDATE users SET reminder_enabled = ?, reminder_time = ? WHERE id = ?').run(enabled ? 1 : 0, validTime, userId);

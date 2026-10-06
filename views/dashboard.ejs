@@ -115,6 +115,7 @@
   const PREP_ENABLED = <%- JSON.stringify(prepEnabled) %>;
   const PREP_SECONDS = <%- JSON.stringify(prepSeconds) %>;
   const PREP_LABEL = <%- JSON.stringify(t('dashboard.prep_label')) %>;
+  const KEEP_SCREEN_ON = <%- JSON.stringify(keepScreenOn) %>;
 
   let mode = 'stopwatch'; // 'stopwatch' | 'countdown'
   let phase = 'idle'; // 'idle' | 'prep' | 'active' -- see startPrepPhase/startActivePhase
@@ -129,6 +130,38 @@
   const stopBtn = document.getElementById('timerStopBtn');
   const modeStopwatchBtn = document.getElementById('modeStopwatchBtn');
   const modeCountdownBtn = document.getElementById('modeCountdownBtn');
+
+  // Screen Wake Lock: keeps the display on during the timer so the phone
+  // doesn't lock mid-shower. The lock is released automatically by the
+  // browser whenever the tab/PWA loses visibility (e.g. switching apps), so
+  // it's re-requested on visibilitychange while the timer is still running
+  // rather than assumed to still be held.
+  let wakeLock = null;
+
+  async function requestWakeLock() {
+    if (!KEEP_SCREEN_ON || !('wakeLock' in navigator)) return;
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+    } catch {
+      // Denied, unsupported in this context, or page not visible -- the
+      // timer still works fine, the screen just might sleep on its own.
+      wakeLock = null;
+    }
+  }
+
+  async function releaseWakeLock() {
+    if (!wakeLock) return;
+    try {
+      await wakeLock.release();
+    } catch {
+      // Already released -- nothing to do.
+    }
+    wakeLock = null;
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && phase !== 'idle') requestWakeLock();
+  });
 
   function formatSeconds(totalSeconds) {
     const clamped = Math.max(0, totalSeconds);
@@ -196,6 +229,7 @@
       display.textContent = DONE_TEXT;
       playBeep();
       resetButtons();
+      releaseWakeLock();
       submitLog(countdownSeconds);
       return;
     }
@@ -296,6 +330,7 @@
   startBtn.addEventListener('click', () => {
     startBtn.disabled = true;
     stopBtn.disabled = false;
+    requestWakeLock();
     if (PREP_ENABLED) {
       startPrepPhase();
     } else {
@@ -312,6 +347,7 @@
       phaseLabel.textContent = '';
       display.textContent = mode === 'countdown' ? formatSeconds(countdownSeconds) : '00:00';
       resetButtons();
+      releaseWakeLock();
       return;
     }
     if (autoCompleted) return; // already auto-submitted when the countdown hit zero
@@ -320,6 +356,7 @@
     phase = 'idle';
     const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
     resetButtons();
+    releaseWakeLock();
     submitLog(elapsedSeconds);
   });
 </script>

@@ -27,6 +27,18 @@
   </div>
 
   <div class="card">
+    <h2 style="margin-top:0"><%= t('settings.keep_screen_on_heading') %></h2>
+    <p class="help-text"><%= t('settings.keep_screen_on_help') %></p>
+    <form method="post" action="/settings/keep-screen-on" style="display:flex; gap:0.6em; align-items:center; flex-wrap:wrap;">
+      <label style="display:flex; gap:0.4em; align-items:center; font-size:0.9em; margin:0;">
+        <input type="checkbox" name="enabled" <%= keepScreenOn ? 'checked' : '' %>>
+        <%= t('settings.keep_screen_on_label') %>
+      </label>
+      <button type="submit"><%= t('settings.save') %></button>
+    </form>
+  </div>
+
+  <div class="card">
     <h2 style="margin-top:0"><%= t('settings.reminder_heading') %></h2>
     <p class="help-text"><%= t('settings.reminder_help') %></p>
     <form method="post" action="/settings/reminder" style="display:flex; gap:0.6em; align-items:center; flex-wrap:wrap;">

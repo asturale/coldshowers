@@ -95,6 +95,12 @@ function ensureColumn(table, column, ddl) {
 ensureColumn('users', 'prep_enabled', 'prep_enabled INTEGER NOT NULL DEFAULT 0');
 ensureColumn('users', 'prep_duration_seconds', 'prep_duration_seconds INTEGER NOT NULL DEFAULT 15');
 
+// Screen Wake Lock during the timer (prep + active phase), so the display
+// doesn't dim/lock mid-shower. Purely a client-side browser API call on the
+// dashboard -- this column just remembers the user's preference across
+// devices/sessions, same as every other toggle here.
+ensureColumn('users', 'keep_screen_on', 'keep_screen_on INTEGER NOT NULL DEFAULT 0');
+
 export function userCount() {
     return db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
 }
