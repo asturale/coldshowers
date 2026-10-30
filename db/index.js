@@ -104,3 +104,9 @@ ensureColumn('users', 'keep_screen_on', 'keep_screen_on INTEGER NOT NULL DEFAULT
 export function userCount() {
     return db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
 }
+
+// SSO identity (lib/oidc.js) this user is linked to: issuer + subject together,
+// since a subject is only unique within one issuer. NULL = not linked.
+ensureColumn('users', 'oidc_issuer', 'oidc_issuer TEXT');
+ensureColumn('users', 'oidc_sub', 'oidc_sub TEXT');
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS users_oidc_identity ON users (oidc_issuer, oidc_sub)');
