@@ -82,7 +82,7 @@ Register Cold Showers at your provider as a confidential client with redirect UR
 | `OIDC_REDIRECT_URI` | `https://<your-host>/auth/oidc/callback`, exactly as registered |
 | `OIDC_PROVIDER_NAME` | button label, e.g. `Authelia` (default `SSO`) |
 | `OIDC_SCOPE` | default `openid profile email` |
-| `PASSWORD_LOGIN` | `false` = SSO only: the login page goes straight to your provider and password sign-in is refused. Only takes effect when SSO is configured. **Link your account first**, or you lock yourself out |
+| `PASSWORD_LOGIN` | `false` = SSO only: the login page goes straight to your provider and password sign-in is refused. Only takes effect when SSO is configured and an account is linked (or `OIDC_LINK_BY_USERNAME=true`), so you can't lock yourself out by setting it too early |
 | `OIDC_LINK_BY_USERNAME` | `true` = the first SSO sign-in links to the existing account with the same username. Only for providers where users can't pick or change their own username. Default off |
 | `OIDC_USERNAME_CLAIM` | claim used for `OIDC_LINK_BY_USERNAME` (default `preferred_username`) |
 

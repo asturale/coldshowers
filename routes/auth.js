@@ -1,6 +1,6 @@
 import express from 'express';
 import { userCount } from '../db/index.js';
-import { createUser, findUserByUsername, verifyPassword, findUserByOidc, findUnlinkedUserByUsername, linkUserOidc } from '../db/auth.js';
+import { createUser, findUserByUsername, verifyPassword, findUserByOidc, findUnlinkedUserByUsername, linkUserOidc, anyUserLinkedToOidc } from '../db/auth.js';
 import { checkPasswordStrength, MIN_LENGTH } from '../lib/password-policy.js';
 import {
     oidcEnabled, passwordLoginEnabled, linkByUsername, oidcConfig, randomToken, safeEqual,
@@ -10,19 +10,27 @@ import {
 const router = express.Router();
 const OIDC_FLOW_MAX_AGE_MS = 10 * 60 * 1000;
 
+// PASSWORD_LOGIN=false only takes effect once an account can actually sign in
+// with SSO (one is linked, or OIDC_LINK_BY_USERNAME is on), so switching it off
+// before linking can't lock everyone out.
+export function passwordLoginActive() {
+    if (passwordLoginEnabled) return true;
+    return !(linkByUsername || anyUserLinkedToOidc(oidcConfig.issuer));
+}
+
 function renderLogin(res, error, status = 200) {
     res.status(status).render('login', {
         error,
         oidcEnabled,
         oidcProviderName: oidcConfig.providerName,
-        passwordLoginEnabled,
+        passwordLoginEnabled: passwordLoginActive(),
     });
 }
 
 // New session id on every sign-in (no session fixation), then log the user in.
 function signIn(req, res, user) {
     req.session.regenerate((err) => {
-        if (err) return renderLogin(res, res.locals.t('login.error_sso'), 500);
+        if (err) return renderLogin(res, res.locals.t('login.error_session'), 500);
         req.session.userId = user.id;
         req.session.username = user.username;
         req.session.save(() => res.redirect('/'));
@@ -60,12 +68,12 @@ router.get('/login', (req, res) => {
     if (userCount() === 0) return res.redirect('/setup');
     if (req.session.userId) return res.redirect('/');
     // SSO-only: skip the page with a single button and go straight to the provider.
-    if (!passwordLoginEnabled) return res.redirect('/auth/oidc/login');
+    if (!passwordLoginActive()) return res.redirect('/auth/oidc/login');
     renderLogin(res, null);
 });
 
 router.post('/login', (req, res) => {
-    if (!passwordLoginEnabled) return renderLogin(res, res.locals.t('login.error_password_disabled'), 403);
+    if (!passwordLoginActive()) return renderLogin(res, res.locals.t('login.error_password_disabled'), 403);
     const { username, password } = req.body;
     const user = findUserByUsername(username || '');
     if (!user || !verifyPassword(password || '', user.password_hash)) {
@@ -119,6 +127,8 @@ router.get('/auth/oidc/callback', async (req, res) => {
     const flow = req.session.oidc;
     const fail = (msg, status = 400) => {
         console.error('OIDC sign-in rejected:', msg);
+        // Already signed in: this was a link from Settings, so go back there.
+        if (req.session.userId) return res.redirect('/settings?sso=error');
         renderLogin(res, res.locals.t('login.error_sso'), status);
     };
     if (!flow || Date.now() - flow.at > OIDC_FLOW_MAX_AGE_MS) return fail('no pending or expired login');

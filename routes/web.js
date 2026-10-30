@@ -1,8 +1,8 @@
 import express from 'express';
 import { requireLogin } from './middleware.js';
 import { findUserById, setUserLocale, unlinkUserOidc } from '../db/auth.js';
-import { oidcEnabled, passwordLoginEnabled, oidcConfig } from '../lib/oidc.js';
-import { sameOrigin } from './auth.js';
+import { oidcEnabled, oidcConfig } from '../lib/oidc.js';
+import { sameOrigin, passwordLoginActive } from './auth.js';
 import { logShower, listShowers, deleteShower, getCurrentStreak, getLongestStreak, chartData, totalCount, localDateStr, showersCountByDayInMonth, showersOnDate } from '../db/showers.js';
 import { setTargetDuration, setPrepCountdown, setReminder, setNotificationSettings, setKeepScreenOn, REMINDER_METHODS } from '../db/settings.js';
 import { sendReminder } from '../lib/notify.js';
@@ -135,8 +135,8 @@ function settingsLocals(req, extra) {
         sso: oidcEnabled ? {
             provider: oidcConfig.providerName,
             linked: Boolean(user.oidc_sub && user.oidc_issuer === oidcConfig.issuer),
-            canUnlink: passwordLoginEnabled,
-            status: ['linked', 'taken', 'unlinked'].includes(req.query.sso) ? req.query.sso : null,
+            canUnlink: passwordLoginActive(),
+            status: ['linked', 'taken', 'unlinked', 'error'].includes(req.query.sso) ? req.query.sso : null,
         } : null,
         ...extra,
     };
@@ -201,7 +201,8 @@ router.post('/push-unsubscribe', (req, res) => {
 // Unlinking is only offered while password sign-in still works (no lock-out).
 router.post('/settings/sso/unlink', (req, res) => {
     if (!sameOrigin(req)) return res.status(403).send('Forbidden');
-    if (oidcEnabled && passwordLoginEnabled) unlinkUserOidc(req.session.userId);
+    if (!oidcEnabled || !passwordLoginActive()) return res.redirect('/settings');
+    unlinkUserOidc(req.session.userId);
     res.redirect('/settings?sso=unlinked');
 });
 

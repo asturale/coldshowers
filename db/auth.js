@@ -45,6 +45,10 @@ export function findUnlinkedUserByUsername(username) {
     return db.prepare('SELECT * FROM users WHERE username = ? AND oidc_sub IS NULL').get(username);
 }
 
+export function anyUserLinkedToOidc(issuer) {
+    return Boolean(db.prepare('SELECT 1 FROM users WHERE oidc_issuer = ? AND oidc_sub IS NOT NULL LIMIT 1').get(issuer));
+}
+
 export function linkUserOidc(userId, issuer, sub) {
     db.prepare('UPDATE users SET oidc_issuer = ?, oidc_sub = ? WHERE id = ?').run(issuer, sub, userId);
 }
