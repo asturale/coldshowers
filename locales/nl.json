@@ -92,5 +92,20 @@
   "calendar.add_button": "Toevoegen",
   "reminder.title": "Koude Douches",
   "reminder.body": "Herinnering: heb je vandaag al je koude douche genomen?",
-  "reminder.test_body": "Dit is een testmelding van Cold Showers."
+  "reminder.test_body": "Dit is een testmelding van Cold Showers.",
+  "login.sso": "Inloggen met {provider}",
+  "login.or": "of",
+  "login.error_sso": "Inloggen via SSO is mislukt. Probeer het opnieuw.",
+  "login.error_sso_no_account": "Er is geen Cold Showers-account voor deze SSO-gebruiker.",
+  "login.error_password_disabled": "Inloggen met wachtwoord staat uit; gebruik SSO.",
+  "settings.sso_heading": "Inloggen via SSO",
+  "settings.sso_is_linked": "Je account is gekoppeld aan {provider}: je kunt daarmee inloggen.",
+  "settings.sso_not_linked": "Koppel je account aan {provider} om daarmee in te loggen.",
+  "settings.sso_link": "Koppelen aan {provider}",
+  "settings.sso_unlink": "Ontkoppelen",
+  "settings.sso_linked_now": "Gekoppeld aan {provider}.",
+  "settings.sso_unlinked_now": "Ontkoppeld.",
+  "settings.sso_taken": "Die SSO-identiteit is al aan een ander account gekoppeld.",
+  "settings.sso_error": "Koppelen is mislukt. Probeer het opnieuw.",
+  "login.error_session": "Er ging iets mis bij het inloggen. Probeer het opnieuw."
 }

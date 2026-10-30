@@ -14,7 +14,7 @@ A small self-hosted tracker for cold showers: a timer (with an optional pre-show
 - **Configurable reminder**: a daily nudge at a time you choose.
 - **Bring-your-own notifications**: the reminder can be sent via [ntfy](https://ntfy.sh) (your own server/topic), your own Telegram bot, or browser web push — nothing is hardcoded to any specific deployment, so plug in your own credentials.
 - **Installable PWA**: add it to your home screen for an app-like experience, with offline-ready app shell assets.
-- **Login**: single-user, session-based (cookie), first launch walks you through creating the one account.
+- **Login**: single-user, session-based (cookie), first launch walks you through creating the one account. Optional single sign-on via any OpenID Connect provider.
 - **English and Dutch** UI (English by default).
 
 <details>
@@ -67,6 +67,29 @@ Put this behind your own reverse proxy (Caddy, nginx, Traefik, ...) for TLS; it'
 | `PORT` | `3000` | HTTP port |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | unset | enables the "Web push" reminder method; generate your own with `npx web-push generate-vapid-keys` |
 | `VAPID_SUBJECT` | unset | a `mailto:` address required by the push protocol, used only to identify your deployment to push services |
+| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_REDIRECT_URI` | unset | enable "Sign in with SSO", see below |
+
+## Sign in with SSO (OpenID Connect)
+
+Optional. Works with any OpenID Connect provider (Authelia, Authentik, Keycloak, Pocket ID, Tinyauth, ...).
+Register Cold Showers at your provider as a confidential client with redirect URI
+`https://<your-host>/auth/oidc/callback`, then set:
+
+| Variable | Description |
+|---|---|
+| `OIDC_ISSUER` | the provider's issuer URL (its `/.well-known/openid-configuration` must be reachable from the container) |
+| `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` | the client credentials from your provider |
+| `OIDC_REDIRECT_URI` | `https://<your-host>/auth/oidc/callback`, exactly as registered |
+| `OIDC_PROVIDER_NAME` | button label, e.g. `Authelia` (default `SSO`) |
+| `OIDC_SCOPE` | default `openid profile email` |
+| `PASSWORD_LOGIN` | `false` = SSO only: the login page goes straight to your provider and password sign-in is refused. Only takes effect when SSO is configured and an account is linked (or `OIDC_LINK_BY_USERNAME=true`), so you can't lock yourself out by setting it too early |
+| `OIDC_LINK_BY_USERNAME` | `true` = the first SSO sign-in links to the existing account with the same username. Only for providers where users can't pick or change their own username. Default off |
+| `OIDC_USERNAME_CLAIM` | claim used for `OIDC_LINK_BY_USERNAME` (default `preferred_username`) |
+
+SSO never creates accounts. Link your existing account once: sign in with your password, go to
+**Settings → Single sign-on → Link**, and confirm at your provider. The link is stored as issuer +
+subject, so renaming yourself at the provider doesn't matter.
+Reminders keep working with SSO and `PASSWORD_LOGIN=false`.
 
 ## Notifications
 
