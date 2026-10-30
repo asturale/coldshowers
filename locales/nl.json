@@ -105,5 +105,7 @@
   "settings.sso_unlink": "Ontkoppelen",
   "settings.sso_linked_now": "Gekoppeld aan {provider}.",
   "settings.sso_unlinked_now": "Ontkoppeld.",
-  "settings.sso_taken": "Die SSO-identiteit is al aan een ander account gekoppeld."
+  "settings.sso_taken": "Die SSO-identiteit is al aan een ander account gekoppeld.",
+  "settings.sso_error": "Koppelen is mislukt. Probeer het opnieuw.",
+  "login.error_session": "Er ging iets mis bij het inloggen. Probeer het opnieuw."
 }

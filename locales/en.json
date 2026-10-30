@@ -105,5 +105,7 @@
   "settings.sso_unlink": "Unlink",
   "settings.sso_linked_now": "Linked to {provider}.",
   "settings.sso_unlinked_now": "Unlinked.",
-  "settings.sso_taken": "That SSO identity is already linked to another account."
+  "settings.sso_taken": "That SSO identity is already linked to another account.",
+  "settings.sso_error": "Linking failed. Please try again.",
+  "login.error_session": "Something went wrong signing you in. Please try again."
 }
