@@ -13,8 +13,9 @@ services:
     volumes:
       - ./data:/data
     networks:
-      - caddy
-
+      - coldshowers-proxy
 networks:
-  caddy:
-    external: true
+  # Dedicated network shared only with the reverse proxy, so services don't
+  # see each other on a shared network; the proxy joins it as an external member.
+  coldshowers-proxy:
+    name: coldshowers-proxy
