@@ -13,8 +13,9 @@ services:
     volumes:
       - ./data:/data
     networks:
-      - caddy
-
+      - coldshowers-proxy
 networks:
-  caddy:
-    external: true
+  # Eigen netwerk met alleen Caddy (30-10-2026): diensten zien elkaar niet meer
+  # via het gedeelde caddy-netwerk. Caddy zit er als external lid op.
+  coldshowers-proxy:
+    name: coldshowers-proxy
