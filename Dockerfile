@@ -10,6 +10,10 @@ COPY package.json ./
 RUN npm install --omit=dev
 COPY . .
 
+# npm (bundled in the base image) is only needed for install; remove it so its
+# vulnerable bundled dependencies are not shipped in the runtime image.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+
 USER node
 EXPOSE 3000
 CMD ["node", "server.js"]
