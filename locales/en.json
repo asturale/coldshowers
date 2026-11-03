@@ -18,6 +18,9 @@
   "setup.error_password_short": "Password must be at least {min} characters.",
   "setup.error_password_common": "This password is too common and not secure enough — pick something unique.",
   "setup.error_mismatch": "Passwords do not match.",
+  "setup.code": "Setup code",
+  "setup.code_hint": "Printed in the server log at startup (docker logs coldshowers).",
+  "setup.error_code": "Wrong or missing setup code. Check the server log.",
   "dashboard.title": "Cold Showers",
   "dashboard.target_label": "Target: {duration}",
   "dashboard.mode_stopwatch": "Stopwatch",
@@ -107,5 +110,6 @@
   "settings.sso_unlinked_now": "Unlinked.",
   "settings.sso_taken": "That SSO identity is already linked to another account.",
   "settings.sso_error": "Linking failed. Please try again.",
-  "login.error_session": "Something went wrong signing you in. Please try again."
+  "login.error_session": "Something went wrong signing you in. Please try again.",
+  "login.error_too_many": "Too many failed attempts. Try again in 15 minutes."
 }

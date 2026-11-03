@@ -41,7 +41,7 @@ services:
     image: ghcr.io/asturale/coldshowers:latest
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"   # put a reverse proxy with HTTPS in front
     environment:
       - SESSION_SECRET=change-me-to-a-long-random-string
     volumes:
@@ -56,13 +56,16 @@ Prefer building from source instead? Clone this repo and run `docker compose up 
 
 The app listens on port 3000 inside the container. Data is stored as SQLite under `./data` — back that directory up however you already back up the rest of your Docker volumes.
 
-Put this behind your own reverse proxy (Caddy, nginx, Traefik, ...) for TLS; it's designed to run on a private network (e.g. behind a VPN/Tailscale) since it isn't hardened for direct public exposure.
+Put this behind your own reverse proxy (Caddy, nginx, Traefik, ...) for TLS. Session cookies are `Secure` by default and won't be set over plain HTTP; for a trusted LAN without HTTPS set `COOKIE_SECURE=false`.
+
+First run: open the site and you'll land on `/setup`. It asks for a one-time setup code, printed in the server log at startup (`docker compose logs | grep 'Setup code'`), so nobody else can claim a fresh instance before you do.
 
 ### Environment variables
 
 | Variable | Default | Purpose |
 |---|---|---|
 | `DATABASE_PATH` | `/data/coldshowers.db` | SQLite file location |
+| `COOKIE_SECURE` | `true` | `false` only for plain-HTTP access on a trusted LAN |
 | `SESSION_SECRET` | random on each restart if unset | set this to a fixed value so logins survive a container restart |
 | `PORT` | `3000` | HTTP port |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | unset | enables the "Web push" reminder method; generate your own with `npx web-push generate-vapid-keys` |
@@ -102,3 +105,10 @@ Configure the reminder method per-user in Settings, not via environment variable
 ## Tech stack
 
 Express, EJS, better-sqlite3, express-session with a SQLite-backed store — no build step, no external services required beyond whatever notification channel you choose to configure.
+
+## Security
+
+- Secure by default: setup needs a one-time code from the log, cookies are `Secure`, `HttpOnly` and `SameSite=Lax`, sessions expire after 90 days without a visit and get a new ID at every sign-in.
+- Failed sign-ins: at most 10 per IP and 50 in total per 15 minutes (in memory, resets on restart). The client IP comes from `X-Forwarded-For` (one trusted hop), so keep the app port reachable only through your proxy.
+- Security headers: `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy` and a CSP that blocks framing, plugins and foreign form targets. **Accepted risk:** the CSP does not yet restrict scripts, because some pages still use inline scripts.
+- Still meant for a private network or behind SSO; not hardened for direct public exposure.
