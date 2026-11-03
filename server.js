@@ -8,6 +8,8 @@ import { findUserById } from './db/auth.js';
 import { detectLocale, translator, dateLocale, SUPPORTED_LOCALES } from './lib/i18n.js';
 import { startReminderScheduler } from './lib/reminder-scheduler.js';
 import authRoutes from './routes/auth.js';
+import { securityHeaders, issueSetupCode } from './lib/security.js';
+import { userCount } from './db/index.js';
 import webRoutes from './routes/web.js';
 
 const app = express();
@@ -18,7 +20,8 @@ const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toSt
 app.set('trust proxy', 1);
 app.set('view engine', 'ejs');
 app.set('views', path.join(import.meta.dirname, 'views'));
-app.use(express.json());
+app.use(securityHeaders);
+app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(import.meta.dirname, 'public')));
 
@@ -31,9 +34,11 @@ app.use(
         cookie: {
             httpOnly: true,
             sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 1000 * 60 * 60 * 24 * 365, // "remember me" -- single-user app
+            // Secure by default; COOKIE_SECURE=false only for plain-HTTP access on a trusted LAN.
+            secure: process.env.COOKIE_SECURE !== 'false',
+            maxAge: 1000 * 60 * 60 * 24 * 90, // signed out after 90 days without a visit
         },
+        rolling: true,
     })
 );
 
@@ -61,5 +66,6 @@ app.use('/', webRoutes);
 app.use((req, res) => res.status(404).render('404'));
 
 const PORT = process.env.PORT || 3000;
+if (userCount() === 0) issueSetupCode();
 app.listen(PORT, () => console.log(`coldshowers listening on :${PORT}`));
 startReminderScheduler();
